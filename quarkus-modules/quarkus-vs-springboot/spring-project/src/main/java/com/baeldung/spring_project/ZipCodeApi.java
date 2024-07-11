@@ -1,24 +1,24 @@
 package com.baeldung.spring_project;
 
-import com.baeldung.spring_project.domain.ZIPRepo;
-import com.baeldung.spring_project.domain.ZipCode;
-import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.r2dbc.UncategorizedR2dbcException;
-import org.springframework.web.bind.annotation.*;
+import java.util.function.Function;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 @RestController
 @RequestMapping(value = "/zipcode")
 public class ZipCodeApi {
 
-    private ZIPRepo zipRepo;
+    private final ZipRepo zipRepo;
 
-    public ZipCodeApi(ZIPRepo zipRepo) {
+    public ZipCodeApi(ZipRepo zipRepo) {
         this.zipRepo = zipRepo;
     }
 
@@ -34,8 +34,8 @@ public class ZipCodeApi {
 
     @PostMapping
     public Mono<ZipCode> create(@RequestBody ZipCode zipCode) {
-        return getById(zipCode.getZip())
-                .switchIfEmpty(Mono.defer(createZipCode(zipCode)))
+        return getById(zipCode.zip())
+                .switchIfEmpty(zipRepo.save(zipCode))
                 .onErrorResume(this::isKeyDuplicated, this.recoverWith(zipCode));
     }
 
@@ -44,17 +44,10 @@ public class ZipCodeApi {
     }
 
     private boolean isKeyDuplicated(Throwable ex) {
-        return ex instanceof DataIntegrityViolationException || ex instanceof UncategorizedR2dbcException;
+        return ex instanceof DuplicateKeyException;
     }
 
     private Function<? super Throwable, ? extends Mono<ZipCode>> recoverWith(ZipCode zipCode) {
-        return throwable -> zipRepo.findById(zipCode.getZip());
-    }
-
-    private Supplier<Mono<? extends ZipCode>> createZipCode(ZipCode zipCode) {
-        return () -> {
-            zipCode.setId(zipCode.getZip());
-            return zipRepo.save(zipCode);
-        };
+        return throwable -> zipRepo.findById(zipCode.zip());
     }
 }
