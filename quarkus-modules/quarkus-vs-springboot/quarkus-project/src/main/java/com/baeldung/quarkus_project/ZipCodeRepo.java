@@ -1,21 +1,28 @@
 package com.baeldung.quarkus_project;
 
-import io.quarkus.hibernate.reactive.panache.PanacheRepositoryBase;
-import io.quarkus.hibernate.reactive.panache.common.runtime.ReactiveTransactional;
-import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import java.util.List;
+import jakarta.inject.Singleton;
+import org.hibernate.reactive.mutiny.Mutiny;
 
-import javax.enterprise.context.ApplicationScoped;
+@Singleton
+public class ZipCodeRepo {
 
-@ApplicationScoped
-public class ZipCodeRepo implements PanacheRepositoryBase<ZipCode, String> {
+    private final Mutiny.SessionFactory sessionFactory;
 
-    public Multi<ZipCode> findByCity(String city) {
-        return find("city = ?1", city).stream();
+    public ZipCodeRepo(Mutiny.SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
     }
 
-    @ReactiveTransactional
+    public Uni<List<ZipCode>> findByCity(String city) {
+        return sessionFactory.withStatelessSession(s -> s.createNamedQuery("findByCity", ZipCode.class).setParameter("city", city).getResultList());
+    }
+
     public Uni<ZipCode> save(ZipCode zipCode) {
-        return zipCode.persist();
+        return sessionFactory.withTransaction(session -> session.persist(zipCode).replaceWith(zipCode));
+    }
+
+    public Uni<ZipCode> findById(String id) {
+        return sessionFactory.withStatelessSession(s -> s.get(ZipCode.class, id));
     }
 }

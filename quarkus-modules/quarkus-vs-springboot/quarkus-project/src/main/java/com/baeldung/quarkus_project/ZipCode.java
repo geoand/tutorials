@@ -3,11 +3,15 @@ package com.baeldung.quarkus_project;
 import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
 @Entity
 @RegisterForReflection
+@org.hibernate.annotations.NamedQuery(
+        name = "findByCity",
+        query = "from ZipCode where city = :city"
+)
 public class ZipCode extends PanacheEntityBase {
 
     @Id

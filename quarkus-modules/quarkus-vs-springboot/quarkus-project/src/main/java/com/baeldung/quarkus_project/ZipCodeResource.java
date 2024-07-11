@@ -3,9 +3,16 @@ package com.baeldung.quarkus_project;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 
-import javax.persistence.PersistenceException;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import java.util.List;
+import jakarta.persistence.PersistenceException;
+import jakarta.ws.rs.core.MediaType;
 
 @Path("/zipcode")
 @Produces(MediaType.APPLICATION_JSON)
@@ -26,7 +33,7 @@ public class ZipCodeResource {
 
     @GET
     @Path("/by_city")
-    public Multi<ZipCode> postZipCode(@QueryParam("city") String city) {
+    public Uni<List<ZipCode>> postZipCode(@QueryParam("city") String city) {
         return zipRepo.findByCity(city);
     }
 
