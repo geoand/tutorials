@@ -1,72 +1,55 @@
 package com.baeldung.quarkus_project;
 
-import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-
-@Entity
 @RegisterForReflection
-@org.hibernate.annotations.NamedQuery(
-        name = "findByCity",
-        query = "from ZipCode where city = :city"
-)
-public class ZipCode extends PanacheEntityBase {
+public class ZipCode {
 
-    @Id
-    private String zip;
-    private String type;
-    private String city;
-    private String state;
-    private String county;
-    private String timezone;
+    private final String zip;
+    private final String type;
+    private final String city;
+    private final String state;
+    private final String county;
+    private final String timezone;
+
+    public ZipCode(String type, String city, String state, String county, String timezone) {
+        this(null, type, city, state, county, timezone);
+    }
+
+    public ZipCode(String zip, String type, String city, String state, String county, String timezone) {
+        this.zip = zip;
+        this.type = type;
+        this.city = city;
+        this.state = state;
+        this.county = county;
+        this.timezone = timezone;
+    }
+
+    public ZipCode withZip(String zip) {
+        return new ZipCode(zip, type, city, state, county, timezone);
+    }
 
     public String getZip() {
         return zip;
-    }
-
-    public void setZip(String zip) {
-        this.zip = zip;
     }
 
     public String getType() {
         return type;
     }
 
-    public void setType(String type) {
-        this.type = type;
-    }
-
     public String getCity() {
         return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
     }
 
     public String getState() {
         return state;
     }
 
-    public void setState(String state) {
-        this.state = state;
-    }
-
     public String getCounty() {
         return county;
     }
 
-    public void setCounty(String county) {
-        this.county = county;
-    }
-
     public String getTimezone() {
         return timezone;
-    }
-
-    public void setTimezone(String timezone) {
-        this.timezone = timezone;
     }
 }
